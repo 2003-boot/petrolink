@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root{
+  --bg: #D7DEE6;      /* fond bleu-gris */
+  --ink: #121316;     /* texte */
+  --muted: #6B7280;   /* texte secondaire */
+  --brand: #F47B20;   /* orange */
+  --card: #FFFFFF;
+  --soft: rgba(0,0,0,.08);
+}
+
+body{
+  background: var(--bg);
+  color: var(--ink);
+}
