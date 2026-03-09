@@ -24,7 +24,7 @@ export default function BackToTop() {
       aria-label="Revenir en haut de la page"
       title="Haut de page"
       className={[
-        "fixed bottom-6 left-6 z-[60]",
+        "fixed bottom-6 left-6 z-[60] cursor-pointer",
         "h-12 w-12 rounded-full",
         "bg-[#10E4D4] backdrop-blur-md border border-white/25",
         "shadow-[0_14px_40px_rgba(0,0,0,.18)]",

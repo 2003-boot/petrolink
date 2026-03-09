@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 export default function ContactStickyButton({
-  // ⚠️ Mets ton numéro au format international sans "+"
-  // ex Côte d’Ivoire: 2250102030405
   whatsappNumber = "2250000000000",
   whatsappMessage = "Bonjour, je voudrais un devis / des informations.",
   companyEmail = "contact@swiftmove.com",
 }) {
+  const { t } = useTranslation();
+
   const [emailOpen, setEmailOpen] = useState(false);
   const [sentToast, setSentToast] = useState(false);
+
+  // Mobile menu
+  const [open, setOpen] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -21,11 +26,15 @@ export default function ContactStickyButton({
 
   const waLink = useMemo(() => {
     const msg = encodeURIComponent(whatsappMessage);
-    // wa.me marche mobile + desktop (WhatsApp Web si pas d’app)
     return `https://wa.me/${whatsappNumber}?text=${msg}`;
   }, [whatsappNumber, whatsappMessage]);
 
-  // ESC pour fermer modal
+  const openWhatsapp = () => {
+    window.open(waLink, "_blank", "noopener,noreferrer");
+    setOpen(false);
+  };
+
+  // ESC pour fermer modal email
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") setEmailOpen(false);
@@ -34,7 +43,7 @@ export default function ContactStickyButton({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // toast auto-hide
+  // Toast auto-hide
   useEffect(() => {
     if (!sentToast) return;
     clearTimeout(toastTimer.current);
@@ -45,120 +54,154 @@ export default function ContactStickyButton({
   const onSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ MODE SIMPLE : ouvre le client mail du visiteur (mailto)
-    const subject = encodeURIComponent(form.subject || "Demande d'information");
-    const body = encodeURIComponent(
-      `Nom: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`
+    const subject = encodeURIComponent(
+      form.subject || t("contact.emailDefaultSubject")
     );
+
+    const body = encodeURIComponent(
+      `${t("contact.fields.name")}: ${form.name}\n${t("contact.fields.email")}: ${form.email}\n\n${t("contact.fields.message")}:\n${form.message}`
+    );
+
     window.location.href = `mailto:${companyEmail}?subject=${subject}&body=${body}`;
 
-    // UI feedback
     setEmailOpen(false);
     setSentToast(true);
-
-    // reset
     setForm({ name: "", email: "", subject: "", message: "" });
   };
 
-  return (
+  if (typeof document === "undefined" || !document.body) return null;
+
+  return createPortal(
     <>
-      {/* Sticky Button */}
-      <div className="fixed bottom-6 right-6 z-[60]">
+      {/* ================= DESKTOP BUTTON ================= */}
+      <div className="fixed bottom-6 right-6 z-[90] hidden md:block">
         <div className="group relative">
-          {/* Base pill */}
           <div
-            className={[
-              "h-16 w-[250px] rounded-full",
-              "bg-[#10E4D4] shadow-[0_16px_40px_rgba(0,0,0,.18)]",
-              "flex items-center justify-center gap-4",
-              "transition-all duration-300",
-            ].join(" ")}
+            className="h-16 w-[250px] rounded-full bg-[#10E4D4]
+                       shadow-[0_16px_40px_rgba(0,0,0,.18)]
+                       flex items-center justify-center gap-4
+                       transition-all duration-300"
           >
-            {/* icon bubble */}
             <div
-              className={[
-                "w-10 h-10 rounded-full bg-black/10",
-                "flex items-center justify-center",
-                "transition-all duration-300 group-hover:opacity-0 group-hover:scale-95",
-              ].join(" ")}
+              className="w-10 h-10 rounded-full bg-black/10
+                         flex items-center justify-center
+                         transition-all duration-300
+                         group-hover:opacity-0 group-hover:scale-95"
             >
               <ChatIcon />
             </div>
 
             <span
-              className={[
-                "text-black text-lg font-medium tracking-tight",
-                "transition-all duration-300",
-                "group-hover:opacity-0 group-hover:translate-y-1",
-              ].join(" ")}
+              className="text-black text-lg font-medium
+                         transition-all duration-300
+                         group-hover:opacity-0 group-hover:translate-y-1"
             >
-              Contactez-nous
+              {t("contact.cta")}
             </span>
 
-            {/* Hover layer with 2 icons */}
+            {/* Hover actions */}
             <div
-              className={[
-                "absolute inset-0 rounded-full",
-                "flex items-center justify-center gap-3",
-                "opacity-0 pointer-events-none",
-                "group-hover:opacity-100 group-hover:pointer-events-auto",
-                "transition-all duration-300",
-              ].join(" ")}
+              className="absolute inset-0 rounded-full
+                         flex items-center justify-center gap-3
+                         opacity-0 pointer-events-none
+                         group-hover:opacity-100 group-hover:pointer-events-auto
+                         transition-all duration-300"
             >
-              {/* WhatsApp */}
               <a
                 href={waLink}
                 target="_blank"
                 rel="noreferrer"
-                className="w-12 h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
-                aria-label="Ouvrir WhatsApp"
-                title="WhatsApp"
+                className="w-12 h-12 rounded-full bg-white/90 hover:bg-white
+                           flex items-center justify-center transition"
+                aria-label={t("contact.whatsapp")}
               >
                 <WhatsAppIcon />
               </a>
 
-              {/* Email */}
               <button
                 type="button"
                 onClick={() => setEmailOpen(true)}
-                className="w-12 h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition cursor-pointer"
-                aria-label="Envoyer un email"
-                title="Email"
+                className="cursor-pointer w-12 h-12 rounded-full bg-white/90 hover:bg-white
+                           flex items-center justify-center transition"
+                aria-label={t("contact.email")}
               >
                 <MailIcon />
               </button>
             </div>
           </div>
-
-          {/* petit hint (optionnel) */}
-          <div className="absolute -top-9 right-0 hidden md:block opacity-0 group-hover:opacity-100 transition text-xs text-black/70">
-            WhatsApp ou Email
-          </div>
         </div>
       </div>
 
-      {/* Email Modal */}
+      {/* ================= MOBILE MAIN BUTTON ================= */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="fixed z-[90] md:hidden
+                  h-12 w-12 rounded-full bg-white/90 border border-black/10
+                  backdrop-blur-md shadow-[0_18px_40px_rgba(0,0,0,.25)]
+                  flex items-center justify-center"
+        style={{
+          right: "max(16px, env(safe-area-inset-right))",
+          bottom: "max(24px, env(safe-area-inset-bottom))",
+        }}
+        aria-label={t("contact.open")}
+      >
+        <ChatIcon className="text-black" />
+      </button>
+
+      {/* ================= MOBILE ACTIONS ================= */}
+      {open && (
+        <div className="fixed bottom-20 right-5 z-[90] md:hidden flex flex-col gap-3">
+          <button
+            onClick={openWhatsapp}
+            className="h-12 w-12 rounded-full bg-white shadow
+                       flex items-center justify-center"
+            aria-label={t("contact.whatsapp")}
+          >
+            <WhatsAppIcon className="text-[#25D366]" />
+          </button>
+
+          <button
+            onClick={() => {
+              setOpen(false);
+              setEmailOpen(true);
+            }}
+            className="h-12 w-12 rounded-full bg-white shadow
+                       flex items-center justify-center cursor-pointer"
+            aria-label={t("contact.email")}
+          >
+            <MailIcon />
+          </button>
+        </div>
+      )}
+
+      {/* ================= EMAIL MODAL ================= */}
       {emailOpen && (
         <div
-          className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm
+                     flex items-center justify-center p-4"
           onMouseDown={() => setEmailOpen(false)}
         >
           <div
-            className="w-full max-w-lg rounded-[24px] bg-white shadow-[0_20px_70px_rgba(0,0,0,.25)] p-5 md:p-6"
+            className="w-full max-w-lg rounded-[24px] bg-white
+                       shadow-[0_20px_70px_rgba(0,0,0,.25)]
+                       p-5 md:p-6"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold">Envoyer un email</h3>
+                <h3 className="text-lg font-semibold">{t("contact.modalTitle")}</h3>
                 <p className="mt-1 text-sm text-[var(--muted)]">
-                  Rédige ton message, puis clique sur <b>Envoyer</b>.
+                  {t("contact.modalDesc")} <b>{t("contact.send")}</b>.
                 </p>
               </div>
 
               <button
                 onClick={() => setEmailOpen(false)}
-                className="w-10 h-10 rounded-full bg-[#F2F4F7] hover:bg-[#E9EDF3] transition flex items-center justify-center"
-                aria-label="Fermer"
+                className="w-10 h-10 rounded-full bg-[#F2F4F7]
+                           hover:bg-[#E9EDF3] transition
+                           flex items-center justify-center"
+                aria-label={t("contact.close")}
               >
                 ✕
               </button>
@@ -167,13 +210,13 @@ export default function ContactStickyButton({
             <form onSubmit={onSubmit} className="mt-5 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Input
-                  label="Nom"
+                  label={t("contact.fields.name")}
                   value={form.name}
                   onChange={(v) => setForm((s) => ({ ...s, name: v }))}
                   required
                 />
                 <Input
-                  label="Email"
+                  label={t("contact.fields.email")}
                   type="email"
                   value={form.email}
                   onChange={(v) => setForm((s) => ({ ...s, email: v }))}
@@ -182,17 +225,17 @@ export default function ContactStickyButton({
               </div>
 
               <Input
-                label="Objet"
+                label={t("contact.fields.subject")}
                 value={form.subject}
                 onChange={(v) => setForm((s) => ({ ...s, subject: v }))}
-                placeholder="Demande de devis…"
+                placeholder={t("contact.placeholders.subject")}
               />
 
               <Textarea
-                label="Message"
+                label={t("contact.fields.message")}
                 value={form.message}
                 onChange={(v) => setForm((s) => ({ ...s, message: v }))}
-                placeholder="Bonjour, je vous contacte pour…"
+                placeholder={t("contact.placeholders.message")}
                 required
               />
 
@@ -200,41 +243,42 @@ export default function ContactStickyButton({
                 <button
                   type="button"
                   onClick={() => setEmailOpen(false)}
-                  className="px-4 py-2 rounded-full bg-[#F2F4F7] hover:bg-[#E9EDF3] transition text-sm"
+                  className="px-4 py-2 rounded-full bg-[#F2F4F7]
+                             hover:bg-[#E9EDF3] transition text-sm"
                 >
-                  Annuler
+                  {t("contact.cancel")}
                 </button>
 
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-full bg-black text-white hover:opacity-90 transition text-sm"
+                  className="px-5 py-2 rounded-full bg-black text-white
+                             hover:opacity-90 transition text-sm"
                 >
-                  Envoyer
+                  {t("contact.send")}
                 </button>
               </div>
-
-              <p className="text-xs text-[var(--muted)]">
-                * Mode simple : l’envoi se fait via l’application mail du visiteur.
-                (On peut brancher un vrai envoi serveur ensuite.)
-              </p>
             </form>
           </div>
         </div>
       )}
 
-      {/* Toast success */}
+      {/* ================= TOAST ================= */}
       {sentToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80]">
-          <div className="rounded-full bg-black text-white px-5 py-3 shadow-[0_14px_40px_rgba(0,0,0,.25)] text-sm">
-            Email envoyé avec succès ✅
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[96]">
+          <div
+            className="rounded-full bg-black text-white px-5 py-3
+                       shadow-[0_14px_40px_rgba(0,0,0,.25)] text-sm"
+          >
+            {t("contact.toastSuccess")}
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.documentElement
   );
 }
 
-/* ---------- Small form components ---------- */
+/* ---------- UI Inputs ---------- */
 
 function Input({ label, type = "text", value, onChange, required, placeholder }) {
   return (
@@ -246,7 +290,9 @@ function Input({ label, type = "text", value, onChange, required, placeholder })
         required={required}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full rounded-xl bg-[#F2F4F7] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+        className="mt-1 w-full rounded-xl bg-[#F2F4F7]
+                   px-4 py-3 text-sm outline-none
+                   focus:ring-2 focus:ring-black/10"
       />
     </label>
   );
@@ -262,7 +308,9 @@ function Textarea({ label, value, onChange, required, placeholder }) {
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         rows={5}
-        className="mt-1 w-full rounded-xl bg-[#F2F4F7] px-4 py-3 text-sm outline-none resize-none focus:ring-2 focus:ring-black/10"
+        className="mt-1 w-full rounded-xl bg-[#F2F4F7]
+                   px-4 py-3 text-sm outline-none resize-none
+                   focus:ring-2 focus:ring-black/10"
       />
     </label>
   );
@@ -270,25 +318,25 @@ function Textarea({ label, value, onChange, required, placeholder }) {
 
 /* ---------- Icons ---------- */
 
-function ChatIcon() {
+function ChatIcon({ className = "text-black" }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-black">
-      <path d="M12 3C6.5 3 2 6.8 2 11.5c0 2.3 1.2 4.5 3.1 6.1L4 22l4.8-2.1c1 .3 2.1.5 3.2.5 5.5 0 10-3.8 10-8.5S17.5 3 12 3zm-3 9h6v2H9v-2zm0-4h10v2H9V8z" />
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 11H6v-2h12v2zm0-3H6V8h12v2z" />
     </svg>
   );
 }
 
-function WhatsAppIcon() {
+function WhatsAppIcon({ className = "text-[#25D366]" }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-black">
-      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 20 12a8 8 0 0 1-8 8zm4.4-6.2c-.2-.1-1.2-.6-1.4-.7-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-1.1-.5-2.1-1.2-2.9-2.1-.2-.2-.2-.4 0-.6l.6-.7c.2-.2.2-.4.1-.6-.1-.2-.6-1.3-.7-1.5-.1-.2-.2-.3-.4-.3h-.6c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2 0 1.2.8 2.4.9 2.6 1.2 2 3 3.5 5.3 4.3.6.2 1.1.3 1.5.2.5-.1 1.2-.5 1.4-1 .2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3z" />
+    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.04 2C6.57 2 2.13 6.44 2.13 11.9c0 1.98.58 3.82 1.58 5.39L2 22l4.83-1.65a9.86 9.86 0 0 0 5.21 1.47h.01c5.47 0 9.91-4.44 9.91-9.9C21.96 6.44 17.52 2 12.04 2zm5.78 14.27c-.24.68-1.43 1.3-1.98 1.38-.52.08-1.18.11-1.9-.12-.44-.14-1-.33-1.73-.65-3.05-1.32-5.04-4.37-5.2-4.6-.16-.23-1.23-1.64-1.23-3.13 0-1.49.78-2.23 1.05-2.54.27-.31.6-.39.8-.39.2 0 .4 0 .57.01.18.01.41-.07.64.49.24.56.81 1.93.88 2.07.07.14.12.31.02.5-.1.2-.16.31-.31.48-.16.17-.33.38-.47.5-.16.14-.32.29-.14.57.18.28.81 1.33 1.74 2.15 1.2 1.07 2.22 1.4 2.5 1.56.28.16.44.14.6-.09.16-.23.69-.81.88-1.09.19-.28.38-.23.64-.14.26.09 1.66.78 1.95.92.29.14.48.21.55.33.07.12.07.69-.17 1.37z" />
     </svg>
   );
 }
 
-function MailIcon() {
+function MailIcon({ className = "text-black" }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-black">
+    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z" />
     </svg>
   );
