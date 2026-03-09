@@ -50,17 +50,14 @@ const resources = {
       8: "Entretien et dépannage des moteurs réducteurs, moteurs diesels",
     },
     industrie: {
-      1: "MAINTENANCES",
-      2: "ORGANISATION; SUIVI ET REALISATION DE PROJETS",
-      3: "COORDINATION ET REALISATION DE TRAVAUX…",
+      1: "Maintenances",
+      2: "Organisation, suivi et réalisation de projets",
+      3: "Coordination et réalisation de travaux…",
     },
     energie: {
       1: "Préparation, préfabrication, fabrication de structures",
       2: "Soudure pipe",
       3: "Soudure navale et sous-marine",
-      4: "Crew change « taxi rade »",
-      5: "Sécurité maritime",
-      6: "Assistance maritime",
       7: "Assemblage, réalisation mécanique",
       8: "Études et gestion de projet",
       9: "Installation et mise en service",
@@ -93,8 +90,6 @@ approAchat: {
 
     procurement: {
       title: "2. Gestion de l’Approvisionnement (Procurement)",
-      intro:
-        "Cette activité assure que le bon matériel arrive au bon moment sur les sites d'exploitation.",
       items: [
         "Gestion des Commandes : Suivi rigoureux du cycle de vie des commandes, de l'expression du besoin à la réception finale.",
         "Contrôle Qualité (Expediting) : Audits réguliers chez les fournisseurs pour s'assurer que les délais de fabrication et les spécifications techniques sont respectés.",
@@ -193,17 +188,14 @@ approAchat: {
             8: "Entretien et dépannage des moteurs réducteurs, moteurs diesels",
           },
           industrie: {
-            1: "MAINTENANCES",
-            2: "ORGANISATION; SUIVI ET REALISATION DE PROJETS",
-            3: "COORDINATION ET REALISATION DE TRAVAUX…",
+            1: "Maintenances",
+            2: "Organisation, suivi et réalisation de projets",
+            3: "Coordination et réalisation de travaux…",
           },
           energie: {
             1: "Préparation, préfabrication, fabrication de structures",
             2: "Soudure pipe",
             3: "Soudure navale et sous-marine",
-            4: "Crew change « taxi rade »",
-            5: "Sécurité maritime",
-            6: "Assistance maritime",
             7: "Assemblage, réalisation mécanique",
             8: "Études et gestion de projet",
             9: "Installation et mise en service",
@@ -231,8 +223,8 @@ approAchat: {
 
       hero: {
         badge: "Votre partenaire logistique mondial",
-        title1: "Des solutions logistiques intelligentes",
-        title2: "et innovantes.",
+        title1: "L’intelligence logistique en mouvement, ",
+        title2: "de l’étude à l’assistance technique.",
         ctaQuote: "Demander un devis",
         ctaLearn: "En savoir plus",
         cardLeftValue: "500+",
@@ -372,17 +364,14 @@ approAchat: {
       8: "Maintenance and troubleshooting of gear motors and diesel engines",
     },
     industrie: {
-      1: "MAINTENANCE",
-      2: "ORGANIZATION, MONITORING AND PROJECT EXECUTION",
-      3: "COORDINATION AND EXECUTION OF WORK…",
+      1: "Maintenance",
+      2: "Organization, monitoring and project execution",
+      3: "Coordination and execution of works…",
     },
     energie: {
       1: "Preparation, prefabrication, and structure manufacturing",
       2: "Pipe welding",
       3: "Marine and underwater welding",
-      4: "Crew change “harbor taxi”",
-      5: "Maritime safety",
-      6: "Maritime assistance",
       7: "Mechanical assembly and execution",
       8: "Project studies and management",
       9: "Installation and commissioning",
@@ -415,8 +404,6 @@ approAchat: {
 
     procurement: {
       title: "2. Procurement Management",
-      intro:
-        "This activity ensures the right equipment arrives at the right time on operational sites.",
       items: [
         "Order management: strict lifecycle tracking from request to final delivery and receipt.",
         "Quality control (expediting): regular supplier audits to ensure manufacturing lead times and technical specifications are met.",
@@ -515,9 +502,9 @@ approAchat: {
             8: "Maintenance and troubleshooting of gear motors and diesel engines",
           },
           industrie: {
-            1: "MAINTENANCE",
-            2: "ORGANIZATION, MONITORING AND PROJECT EXECUTION",
-            3: "COORDINATION AND EXECUTION OF WORK…",
+            1: "Maintenance",
+            2: "Organization, monitoring and project execution",
+            3: "Coordination and execution of works…",
           },
           energie: {
             1: "Preparation, prefabrication, and structure manufacturing",
@@ -553,8 +540,8 @@ approAchat: {
 
       hero: {
         badge: "Your global logistics partner",
-        title1: "Smart logistics solutions",
-        title2: "and innovation.",
+        title1: "Logistics intelligence in motion,",
+        title2: "from study to technical assistance.",
         ctaQuote: "Request a quote",
         ctaLearn: "Learn more",
         cardLeftValue: "500+",

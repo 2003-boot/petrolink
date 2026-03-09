@@ -16,7 +16,6 @@ const blocks = [
     id: "procurement",
     icon: "boxes-stacked",
     titleKey: "approAchat.sections.procurement.title",
-    introKey: "approAchat.sections.procurement.intro",
     itemsKey: "approAchat.sections.procurement.items",
     images: ["appro/approvisionnement1.webp", "appro/approvisionnement2.webp"],
   },
