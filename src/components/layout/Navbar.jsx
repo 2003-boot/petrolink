@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Container from "./Container";
-import logo from "../../assets/images/site-2-logo.webp";
+import logo from "../../assets/images/petrolink-service-logo.webp";
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();

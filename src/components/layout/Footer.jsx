@@ -1,10 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Container from "./Container";
+import logo from "../../assets/images/petrolink-service-logo-noir.webp";
 
-const withBase = (path) => {
-  const base = import.meta.env.BASE_URL || "/";
-  return `${base}${String(path).replace(/^\//, "")}`;
-};
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -18,7 +15,7 @@ export default function Footer() {
             <div data-aos="fade-down" data-aos-duration="300">
               <div className="flex items-center gap-3">
                 <img
-                  src={withBase("/logo.webp")}
+                  src={logo}
                   alt="Petrolink Service"
                   className="h-24 w-auto object-contain"
                   loading="lazy"
