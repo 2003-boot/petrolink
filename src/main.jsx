@@ -13,7 +13,7 @@ AOS.init();
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <LanguageProvider>
-      <BrowserRouter basename="/petrolink/">
+      <BrowserRouter>
         <App />
       </BrowserRouter>
     </LanguageProvider>
