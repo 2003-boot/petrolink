@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import emailjs from "@emailjs/browser";
 import { useTranslation } from "react-i18next";
 
 export default function ContactStickyButton({
   whatsappNumber = "2250000000000",
   whatsappMessage = "Bonjour, je voudrais un devis / des informations.",
-  companyEmail = "contact@swiftmove.com",
 }) {
   const { t } = useTranslation();
 
   const [emailOpen, setEmailOpen] = useState(false);
   const [sentToast, setSentToast] = useState(false);
-
-  // Mobile menu
   const [open, setOpen] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -34,7 +33,6 @@ export default function ContactStickyButton({
     setOpen(false);
   };
 
-  // ESC pour fermer modal email
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") setEmailOpen(false);
@@ -43,7 +41,6 @@ export default function ContactStickyButton({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Toast auto-hide
   useEffect(() => {
     if (!sentToast) return;
     clearTimeout(toastTimer.current);
@@ -51,29 +48,42 @@ export default function ContactStickyButton({
     return () => clearTimeout(toastTimer.current);
   }, [sentToast]);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    if (sending) return;
 
-    const subject = encodeURIComponent(
-      form.subject || t("contact.emailDefaultSubject")
-    );
+    setSending(true);
 
-    const body = encodeURIComponent(
-      `${t("contact.fields.name")}: ${form.name}\n${t("contact.fields.email")}: ${form.email}\n\n${t("contact.fields.message")}:\n${form.message}`
-    );
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_POPUP,
+        {
+          name: form.name,
+          email: form.email,
+          title: form.subject || t("contact.emailDefaultSubject"),
+          message: form.message,
+        },
+        {
+          publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+        }
+      );
 
-    window.location.href = `mailto:${companyEmail}?subject=${subject}&body=${body}`;
-
-    setEmailOpen(false);
-    setSentToast(true);
-    setForm({ name: "", email: "", subject: "", message: "" });
+      setEmailOpen(false);
+      setSentToast(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      console.error("EmailJS popup error:", error);
+      alert("Impossible d'envoyer le message pour le moment.");
+    } finally {
+      setSending(false);
+    }
   };
 
   if (typeof document === "undefined" || !document.body) return null;
 
   return createPortal(
     <>
-      {/* ================= DESKTOP BUTTON ================= */}
       <div className="fixed bottom-6 right-6 z-[90] hidden md:block">
         <div className="group relative">
           <div
@@ -99,7 +109,6 @@ export default function ContactStickyButton({
               {t("contact.cta")}
             </span>
 
-            {/* Hover actions */}
             <div
               className="absolute inset-0 rounded-full
                          flex items-center justify-center gap-3
@@ -132,7 +141,6 @@ export default function ContactStickyButton({
         </div>
       </div>
 
-      {/* ================= MOBILE MAIN BUTTON ================= */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -149,7 +157,6 @@ export default function ContactStickyButton({
         <ChatIcon className="text-black" />
       </button>
 
-      {/* ================= MOBILE ACTIONS ================= */}
       {open && (
         <div className="fixed bottom-20 right-5 z-[90] md:hidden flex flex-col gap-3">
           <button
@@ -175,7 +182,6 @@ export default function ContactStickyButton({
         </div>
       )}
 
-      {/* ================= EMAIL MODAL ================= */}
       {emailOpen && (
         <div
           className="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm
@@ -251,10 +257,11 @@ export default function ContactStickyButton({
 
                 <button
                   type="submit"
+                  disabled={sending}
                   className="px-5 py-2 rounded-full bg-black text-white
-                             hover:opacity-90 transition text-sm"
+                             hover:opacity-90 transition text-sm disabled:opacity-60"
                 >
-                  {t("contact.send")}
+                  {sending ? "Envoi..." : t("contact.send")}
                 </button>
               </div>
             </form>
@@ -262,7 +269,6 @@ export default function ContactStickyButton({
         </div>
       )}
 
-      {/* ================= TOAST ================= */}
       {sentToast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[96]">
           <div
@@ -277,8 +283,6 @@ export default function ContactStickyButton({
     document.documentElement
   );
 }
-
-/* ---------- UI Inputs ---------- */
 
 function Input({ label, type = "text", value, onChange, required, placeholder }) {
   return (
@@ -315,8 +319,6 @@ function Textarea({ label, value, onChange, required, placeholder }) {
     </label>
   );
 }
-
-/* ---------- Icons ---------- */
 
 function ChatIcon({ className = "text-black" }) {
   return (

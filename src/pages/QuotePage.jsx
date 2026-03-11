@@ -1,4 +1,5 @@
 import { useState } from "react";
+import emailjs from "@emailjs/browser";
 import { useTranslation } from "react-i18next";
 import Container from "../components/layout/Container";
 import { Link } from "react-router-dom";
@@ -6,30 +7,47 @@ import { Link } from "react-router-dom";
 export default function QuotePage() {
   const { t } = useTranslation();
 
-  // ✅ service pré-sélectionné (plus de "choisir un service")
   const [service, setService] = useState("approvisionnement");
   const [phone, setPhone] = useState("");
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const canSend = phone.trim().length >= 6;
+  const canSend = phone.trim().length >= 6 && !loading;
 
   const submit = async () => {
     if (!canSend) return;
 
-    // 🔌 EmailJS à intégrer plus tard
-    // emailjs.send(SERVICE_ID, TEMPLATE_ID, { service, phone }, PUBLIC_KEY);
+    setLoading(true);
 
-    setSent(true);
-    setTimeout(() => setSent(false), 2500);
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_QUOTE,
+        {
+          service,
+          phone,
+        },
+        {
+          publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+        }
+      );
 
-    setPhone("");
+      setSent(true);
+      setTimeout(() => setSent(false), 2500);
+      setPhone("");
+      setService("approvisionnement");
+    } catch (error) {
+      console.error("EmailJS quote error:", error);
+      alert("Impossible d'envoyer la demande pour le moment.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <section className="py-10 md:py-14">
       <Container full>
         <div className="mx-auto w-full max-w-[720px]">
-          {/* Back */}
           <div className="mb-4">
             <Link
               to="/#home"
@@ -39,9 +57,7 @@ export default function QuotePage() {
             </Link>
           </div>
 
-          {/* Card */}
           <div className="rounded-[28px] bg-[var(--bg)] p-6 md:p-10 shadow-[0_10px_30px_rgba(0,0,0,.08)]">
-            {/* Header */}
             <div>
               <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm shadow-[0_8px_20px_rgba(0,0,0,.08)]">
                 <span>★</span>
@@ -57,10 +73,8 @@ export default function QuotePage() {
               </p>
             </div>
 
-            {/* Form */}
             <div className="mt-8 rounded-[22px] bg-white border border-[#E7ECF2] p-5 md:p-8 shadow-[0_12px_35px_rgba(0,0,0,.06)]">
               <div className="space-y-5">
-                {/* Service */}
                 <div className="rounded-2xl border border-black/10 p-4">
                   <label className="text-xs text-black/60">
                     {t("quote.service")}
@@ -83,7 +97,6 @@ export default function QuotePage() {
                   </select>
                 </div>
 
-                {/* Phone */}
                 <div className="rounded-2xl border border-black/10 p-4">
                   <label className="text-xs text-black/60">
                     {t("quote.phone")}
@@ -97,7 +110,6 @@ export default function QuotePage() {
                   />
                 </div>
 
-                {/* Action */}
                 <button
                   onClick={submit}
                   disabled={!canSend}
@@ -108,13 +120,12 @@ export default function QuotePage() {
                       : "bg-black/20 text-white/60 cursor-not-allowed",
                   ].join(" ")}
                 >
-                  {t("quote.send")}
+                  {loading ? "Envoi..." : t("quote.send")}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Toast */}
           <div
             className={[
               "fixed left-1/2 bottom-6 -translate-x-1/2 z-[80]",
